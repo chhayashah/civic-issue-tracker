@@ -1,0 +1,68 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+}
+
+// User table
+model User {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  password  String
+  role      Role     @default(CITIZEN)
+  createdAt DateTime @default(now())
+
+  issues    Issue[]
+  upvotes   Upvote[]
+}
+
+enum Role {
+  CITIZEN
+  ADMIN
+}
+
+// Issue table
+model Issue {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  category    Category
+  imageUrl    String?
+  latitude    Float
+  longitude   Float
+  status      Status   @default(PENDING)
+  createdAt   DateTime @default(now())
+
+  createdBy   User     @relation(fields: [userId], references: [id])
+  userId      String
+
+  upvotes     Upvote[]
+}
+
+enum Category {
+  POTHOLE
+  STREETLIGHT
+  GARBAGE
+  WATERLOGGING
+  OTHER
+}
+
+enum Status {
+  PENDING
+  IN_REVIEW
+  RESOLVED
+}
+
+// Upvote table
+model Upvote {
+  id       String @id @default(cuid())
+  user     User   @relation(fields: [userId], references: [id])
+  userId   String
+  issue    Issue  @relation(fields: [issueId], references: [id])
+  issueId  String
+
+  @@unique([userId, issueId])
+}
