@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
+import { useSession } from "next-auth/react";
 
 const IssuesMap = dynamic(() => import("@/components/IssuesMap"), {
   ssr: false,
@@ -23,7 +24,7 @@ type Issue = {
   status: string;
   createdAt: string;
   createdBy: { name: string };
-  upvotes: { id: string }[];
+  upvotes: { id: string; userId: string }[];
 };
 
 const categoryLabels: Record<string, string> = {
@@ -41,18 +42,51 @@ const statusColors: Record<string, string> = {
 };
 
 export default function IssuesPage() {
+  const { data: session } = useSession();
   const [issues, setIssues] = useState<Issue[]>([]);
   const [loading, setLoading] = useState(true);
   const [categoryFilter, setCategoryFilter] = useState("ALL");
+  const [upvotingIds, setUpvotingIds] = useState<Set<string>>(new Set());
 
-  useEffect(() => {
+  const fetchIssues = () => {
     fetch("/api/issues")
       .then((res) => res.json())
       .then((data) => {
         setIssues(data.issues || []);
         setLoading(false);
       });
+  };
+
+  useEffect(() => {
+    fetchIssues();
   }, []);
+
+  const handleUpvote = async (issueId: string) => {
+    if (!session?.user) {
+      alert("Upvote karne ke liye login karo");
+      return;
+    }
+
+    if (upvotingIds.has(issueId)) return; // Already request chal rahi hai, dobara mat bhejo
+
+    setUpvotingIds((prev) => new Set(prev).add(issueId));
+
+    try {
+      const res = await fetch(`/api/issues/${issueId}/upvote`, {
+        method: "POST",
+      });
+
+      if (res.ok) {
+        fetchIssues();
+      }
+    } finally {
+      setUpvotingIds((prev) => {
+        const next = new Set(prev);
+        next.delete(issueId);
+        return next;
+      });
+    }
+  };
 
   const filteredIssues =
     categoryFilter === "ALL"
@@ -63,7 +97,6 @@ export default function IssuesPage() {
     <div className="mx-auto max-w-6xl p-6">
       <h1 className="mb-6 text-2xl font-bold text-gray-800">Reported Issues</h1>
 
-      {/* Filter */}
       <div className="mb-6">
         <select
           value={categoryFilter}
@@ -79,49 +112,64 @@ export default function IssuesPage() {
         </select>
       </div>
 
-      {/* Map view */}
       <div className="mb-8">
         <IssuesMap issues={filteredIssues} />
       </div>
 
-      {/* List view */}
       {loading ? (
         <p className="text-gray-500">Loading issues...</p>
       ) : filteredIssues.length === 0 ? (
         <p className="text-gray-500">Koi issue nahi mila.</p>
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {filteredIssues.map((issue) => (
-            <div key={issue.id} className="rounded-lg bg-white p-4 shadow-sm">
-              {issue.imageUrl && (
-                <img
-                  src={issue.imageUrl}
-                  alt={issue.title}
-                  className="mb-3 h-40 w-full rounded object-cover"
-                />
-              )}
-              <div className="mb-2 flex items-center justify-between">
-                <span className="rounded bg-gray-100 px-2 py-1 text-xs font-medium text-gray-700">
-                  {categoryLabels[issue.category]}
-                </span>
-                <span
-                  className={`rounded px-2 py-1 text-xs font-medium ${statusColors[issue.status]}`}
-                >
-                  {issue.status.replace("_", " ")}
-                </span>
+          {filteredIssues.map((issue) => {
+            const hasUpvoted = issue.upvotes.some(
+              (u) => u.userId === session?.user?.id,
+            );
+            const isUpvoting = upvotingIds.has(issue.id);
+
+            return (
+              <div key={issue.id} className="rounded-lg bg-white p-4 shadow-sm">
+                {issue.imageUrl && (
+                  <img
+                    src={issue.imageUrl}
+                    alt={issue.title}
+                    className="mb-3 h-40 w-full rounded object-cover"
+                  />
+                )}
+                <div className="mb-2 flex items-center justify-between">
+                  <span className="rounded bg-gray-100 px-2 py-1 text-xs font-medium text-gray-700">
+                    {categoryLabels[issue.category]}
+                  </span>
+                  <span
+                    className={`rounded px-2 py-1 text-xs font-medium ${statusColors[issue.status]}`}
+                  >
+                    {issue.status.replace("_", " ")}
+                  </span>
+                </div>
+                <h3 className="mb-1 font-semibold text-gray-800">
+                  {issue.title}
+                </h3>
+                <p className="mb-3 text-sm text-gray-600 line-clamp-2">
+                  {issue.description}
+                </p>
+                <div className="flex items-center justify-between text-xs text-gray-400">
+                  <span>By {issue.createdBy.name}</span>
+                  <button
+                    onClick={() => handleUpvote(issue.id)}
+                    disabled={isUpvoting}
+                    className={`flex items-center gap-1 rounded px-2 py-1 font-medium transition disabled:opacity-50 ${
+                      hasUpvoted
+                        ? "bg-blue-100 text-blue-700"
+                        : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                    }`}
+                  >
+                    👍 {issue.upvotes.length}
+                  </button>
+                </div>
               </div>
-              <h3 className="mb-1 font-semibold text-gray-800">
-                {issue.title}
-              </h3>
-              <p className="mb-2 text-sm text-gray-600 line-clamp-2">
-                {issue.description}
-              </p>
-              <div className="flex items-center justify-between text-xs text-gray-400">
-                <span>By {issue.createdBy.name}</span>
-                <span>👍 {issue.upvotes.length}</span>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>
