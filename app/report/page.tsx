@@ -1,0 +1,194 @@
+"use client";
+
+import { useState } from "react";
+import dynamic from "next/dynamic";
+import { useRouter } from "next/navigation";
+
+// Dynamic import — ye SSR issue solve karta hai
+const LocationPicker = dynamic(() => import("@/components/LocationPicker"), {
+  ssr: false,
+  loading: () => (
+    <div className="flex h-[300px] items-center justify-center rounded bg-gray-100">
+      Map load ho raha hai...
+    </div>
+  ),
+});
+
+export default function ReportIssuePage() {
+  const router = useRouter();
+  const [formData, setFormData] = useState({
+    title: "",
+    description: "",
+    category: "POTHOLE",
+  });
+  const [image, setImage] = useState<File | null>(null);
+  const [location, setLocation] = useState<{ lat: number; lng: number } | null>(
+    null,
+  );
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handleChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >,
+  ) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+
+    if (!location) {
+      setError("Map pe click karke location select karo");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      let imageUrl = "";
+
+      // Pehle image upload karo (agar select ki hai)
+      if (image) {
+        const imgFormData = new FormData();
+        imgFormData.append("file", image);
+
+        const uploadRes = await fetch("/api/upload", {
+          method: "POST",
+          body: imgFormData,
+        });
+
+        const uploadData = await uploadRes.json();
+
+        if (!uploadRes.ok) {
+          throw new Error(uploadData.error || "Image upload fail hua");
+        }
+
+        imageUrl = uploadData.url;
+      }
+
+      // Ab issue create karo
+      const res = await fetch("/api/issues", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...formData,
+          imageUrl,
+          latitude: location.lat,
+          longitude: location.lng,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || "Issue create nahi hua");
+      }
+
+      router.push("/issues");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Kuch galat ho gaya");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="mx-auto max-w-2xl p-6">
+      <h1 className="mb-6 text-2xl font-bold text-gray-800">
+        Naya Issue Report Karo
+      </h1>
+
+      <form
+        onSubmit={handleSubmit}
+        className="space-y-5 rounded-lg bg-white p-6 shadow-sm"
+      >
+        {error && (
+          <p className="rounded bg-red-100 p-2 text-sm text-red-600">{error}</p>
+        )}
+
+        <div>
+          <label className="mb-1 block text-sm font-medium text-gray-700">
+            Title
+          </label>
+          <input
+            type="text"
+            name="title"
+            value={formData.title}
+            onChange={handleChange}
+            className="w-full rounded border border-gray-300 p-2"
+            placeholder="e.g. Bada gaddha MG Road pe"
+            required
+          />
+        </div>
+
+        <div>
+          <label className="mb-1 block text-sm font-medium text-gray-700">
+            Description
+          </label>
+          <textarea
+            name="description"
+            value={formData.description}
+            onChange={handleChange}
+            className="w-full rounded border border-gray-300 p-2"
+            rows={4}
+            placeholder="Issue ke baare mein detail mein batao"
+            required
+          />
+        </div>
+
+        <div>
+          <label className="mb-1 block text-sm font-medium text-gray-700">
+            Category
+          </label>
+          <select
+            name="category"
+            value={formData.category}
+            onChange={handleChange}
+            className="w-full rounded border border-gray-300 p-2"
+          >
+            <option value="POTHOLE">Pothole</option>
+            <option value="STREETLIGHT">Street Light</option>
+            <option value="GARBAGE">Garbage</option>
+            <option value="WATERLOGGING">Water Logging</option>
+            <option value="OTHER">Other</option>
+          </select>
+        </div>
+
+        <div>
+          <label className="mb-1 block text-sm font-medium text-gray-700">
+            Photo (optional)
+          </label>
+          <input
+            type="file"
+            accept="image/*"
+            onChange={(e) => setImage(e.target.files?.[0] || null)}
+            className="w-full rounded border border-gray-300 p-2"
+          />
+        </div>
+
+        <div>
+          <label className="mb-1 block text-sm font-medium text-gray-700">
+            Location (map pe click karo)
+          </label>
+          <LocationPicker onSelect={(lat, lng) => setLocation({ lat, lng })} />
+          {location && (
+            <p className="mt-1 text-xs text-gray-500">
+              Selected: {location.lat.toFixed(4)}, {location.lng.toFixed(4)}
+            </p>
+          )}
+        </div>
+
+        <button
+          type="submit"
+          disabled={loading}
+          className="w-full rounded bg-blue-600 py-2 font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+        >
+          {loading ? "Submit ho raha hai..." : "Submit Issue"}
+        </button>
+      </form>
+    </div>
+  );
+}
