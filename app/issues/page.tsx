@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import { useSession } from "next-auth/react";
+import Link from "next/link";
 
 const IssuesMap = dynamic(() => import("@/components/IssuesMap"), {
   ssr: false,
@@ -91,7 +92,7 @@ export default function IssuesPage() {
 
   const filteredIssues = issues
     .filter((issue) =>
-      categoryFilter === "ALL" ? true : issue.category === categoryFilter
+      categoryFilter === "ALL" ? true : issue.category === categoryFilter,
     )
     .filter((issue) => {
       if (!searchQuery.trim()) return true;
@@ -104,9 +105,7 @@ export default function IssuesPage() {
 
   return (
     <div className="mx-auto max-w-6xl p-6">
-      <h1 className="mb-6 text-2xl font-bold text-gray-800">
-        Reported Issues
-      </h1>
+      <h1 className="mb-6 text-2xl font-bold text-gray-800">Reported Issues</h1>
 
       <div className="mb-6 flex flex-col gap-3 sm:flex-row">
         <input
@@ -142,15 +141,12 @@ export default function IssuesPage() {
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {filteredIssues.map((issue) => {
             const hasUpvoted = issue.upvotes.some(
-              (u) => u.userId === session?.user?.id
+              (u) => u.userId === session?.user?.id,
             );
             const isUpvoting = upvotingIds.has(issue.id);
 
             return (
-              <div
-                key={issue.id}
-                className="rounded-lg bg-white p-4 shadow-sm"
-              >
+              <div key={issue.id} className="rounded-lg bg-white p-4 shadow-sm">
                 {issue.imageUrl && (
                   <img
                     src={issue.imageUrl}
@@ -168,9 +164,13 @@ export default function IssuesPage() {
                     {issue.status.replace("_", " ")}
                   </span>
                 </div>
-                <h3 className="mb-1 font-semibold text-gray-800">
-                  {issue.title}
-                </h3>
+
+                <Link href={`/issues/${issue.id}`}>
+                  <h3 className="mb-1 font-semibold text-gray-800 hover:text-blue-600 hover:underline">
+                    {issue.title}
+                  </h3>
+                </Link>
+
                 <p className="mb-3 text-sm text-gray-600 line-clamp-2">
                   {issue.description}
                 </p>

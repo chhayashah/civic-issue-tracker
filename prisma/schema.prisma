@@ -6,6 +6,18 @@ datasource db {
   provider  = "postgresql"
 }
 
+model Comment {
+  id        String   @id @default(cuid())
+  content   String
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+
+  issue     Issue    @relation(fields: [issueId], references: [id])
+  issueId   String
+}
+
 // User table
 model User {
   id        String   @id @default(cuid())
@@ -17,12 +29,15 @@ model User {
 
   issues    Issue[]
   upvotes   Upvote[]
+  comments  Comment[]  
 }
 
 enum Role {
   CITIZEN
   ADMIN
 }
+
+
 
 // Issue table
 model Issue {
@@ -40,6 +55,7 @@ model Issue {
   userId      String
 
   upvotes     Upvote[]
+  comments    Comment[] 
 }
 
 enum Category {
