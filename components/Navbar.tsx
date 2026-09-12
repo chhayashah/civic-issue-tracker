@@ -1,10 +1,60 @@
 "use client";
 
+import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import { useSession, signOut } from "next-auth/react";
 
+type Notification = {
+  id: string;
+  message: string;
+  read: boolean;
+  createdAt: string;
+  link: string | null;
+};
+
 export default function Navbar() {
   const { data: session, status } = useSession();
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  const unreadCount = notifications.filter((n) => !n.read).length;
+
+  const fetchNotifications = () => {
+    if (!session?.user) return;
+    fetch("/api/notifications")
+      .then((res) => res.json())
+      .then((data) => setNotifications(data.notifications || []));
+  };
+
+  useEffect(() => {
+    fetchNotifications();
+    // Har 30 second mein naye notifications check karo
+    const interval = setInterval(fetchNotifications, 30000);
+    return () => clearInterval(interval);
+  }, [session?.user]);
+
+  // Dropdown ke bahar click karne pe band ho jaye
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(e.target as Node)
+      ) {
+        setShowDropdown(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const handleNotificationClick = async (notif: Notification) => {
+    if (!notif.read) {
+      await fetch(`/api/notifications/${notif.id}/read`, { method: "PATCH" });
+      fetchNotifications();
+    }
+    setShowDropdown(false);
+  };
 
   return (
     <nav className="flex items-center justify-between bg-white px-6 py-4 shadow-sm">
@@ -38,6 +88,52 @@ export default function Navbar() {
                 Admin Panel
               </Link>
             )}
+
+            {/* Bell icon aur dropdown */}
+            <div className="relative" ref={dropdownRef}>
+              <button
+                onClick={() => setShowDropdown((prev) => !prev)}
+                className="relative rounded-full p-2 text-gray-600 hover:bg-gray-100"
+              >
+                🔔
+                {unreadCount > 0 && (
+                  <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white">
+                    {unreadCount > 9 ? "9+" : unreadCount}
+                  </span>
+                )}
+              </button>
+
+              {showDropdown && (
+                <div className="absolute right-0 mt-2 w-80 rounded-lg bg-white shadow-lg ring-1 ring-black/5">
+                  <div className="border-b p-3 font-semibold text-gray-800">
+                    Notifications
+                  </div>
+                  <div className="max-h-80 overflow-y-auto">
+                    {notifications.length === 0 ? (
+                      <p className="p-4 text-sm text-gray-400">
+                        Koi notification nahi hai.
+                      </p>
+                    ) : (
+                      notifications.map((notif) => (
+                        <Link
+                          key={notif.id}
+                          href={notif.link || "#"}
+                          onClick={() => handleNotificationClick(notif)}
+                          className={`block border-b p-3 text-sm hover:bg-gray-50 ${
+                            !notif.read ? "bg-blue-50" : ""
+                          }`}
+                        >
+                          <p className="text-gray-700">{notif.message}</p>
+                          <p className="mt-1 text-xs text-gray-400">
+                            {new Date(notif.createdAt).toLocaleString()}
+                          </p>
+                        </Link>
+                      ))
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
 
             <span className="text-sm text-gray-600">
               Hi, {session.user.name}

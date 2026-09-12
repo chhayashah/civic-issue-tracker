@@ -36,6 +36,20 @@ export async function PATCH(
       data: { status },
     });
 
+     const statusLabels: Record<string, string> = {
+      PENDING: "Pending",
+      IN_REVIEW: "In Review",
+      RESOLVED: "Resolved",
+    };
+
+    await prisma.notification.create({
+      data: {
+        message: `Tumhare issue "${issue.title}" ka status "${statusLabels[status]}" ho gaya`,
+        userId: issue.userId,
+        link: `/issues/${issueId}`,
+      },
+    });
+
     return NextResponse.json({ issue });
   } catch (error) {
     console.error(error);

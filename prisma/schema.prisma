@@ -29,7 +29,8 @@ model User {
 
   issues    Issue[]
   upvotes   Upvote[]
-  comments  Comment[]  
+  comments  Comment[] 
+  notifications Notification[] 
 }
 
 enum Role {
@@ -81,4 +82,15 @@ model Upvote {
   issueId  String
 
   @@unique([userId, issueId])
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  message   String
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+  link      String?
+
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
 }

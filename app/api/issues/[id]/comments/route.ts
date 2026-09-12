@@ -40,6 +40,21 @@ export async function POST(
         user: { select: { name: true } },
       },
     });
+      
+      const issue = await prisma.issue.findUnique({
+      where: { id: issueId },
+      select: { userId: true, title: true },
+    });
+
+    if (issue && issue.userId !== session.user.id) {
+      await prisma.notification.create({
+        data: {
+          message: `${session.user.name} ne tumhare issue "${issue.title}" pe comment kiya`,
+          userId: issue.userId,
+          link: `/issues/${issueId}`,
+        },
+      });
+    }
 
     return NextResponse.json({ comment }, { status: 201 });
   } catch (error) {
