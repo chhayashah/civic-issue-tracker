@@ -46,6 +46,7 @@ export default function IssuesPage() {
   const [issues, setIssues] = useState<Issue[]>([]);
   const [loading, setLoading] = useState(true);
   const [categoryFilter, setCategoryFilter] = useState("ALL");
+  const [searchQuery, setSearchQuery] = useState("");
   const [upvotingIds, setUpvotingIds] = useState<Set<string>>(new Set());
 
   const fetchIssues = () => {
@@ -67,7 +68,7 @@ export default function IssuesPage() {
       return;
     }
 
-    if (upvotingIds.has(issueId)) return; // Already request chal rahi hai, dobara mat bhejo
+    if (upvotingIds.has(issueId)) return;
 
     setUpvotingIds((prev) => new Set(prev).add(issueId));
 
@@ -88,16 +89,33 @@ export default function IssuesPage() {
     }
   };
 
-  const filteredIssues =
-    categoryFilter === "ALL"
-      ? issues
-      : issues.filter((issue) => issue.category === categoryFilter);
+  const filteredIssues = issues
+    .filter((issue) =>
+      categoryFilter === "ALL" ? true : issue.category === categoryFilter
+    )
+    .filter((issue) => {
+      if (!searchQuery.trim()) return true;
+      const query = searchQuery.toLowerCase();
+      return (
+        issue.title.toLowerCase().includes(query) ||
+        issue.description.toLowerCase().includes(query)
+      );
+    });
 
   return (
     <div className="mx-auto max-w-6xl p-6">
-      <h1 className="mb-6 text-2xl font-bold text-gray-800">Reported Issues</h1>
+      <h1 className="mb-6 text-2xl font-bold text-gray-800">
+        Reported Issues
+      </h1>
 
-      <div className="mb-6">
+      <div className="mb-6 flex flex-col gap-3 sm:flex-row">
+        <input
+          type="text"
+          placeholder="Search by title or description..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="flex-1 rounded border border-gray-300 p-2"
+        />
         <select
           value={categoryFilter}
           onChange={(e) => setCategoryFilter(e.target.value)}
@@ -124,12 +142,15 @@ export default function IssuesPage() {
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {filteredIssues.map((issue) => {
             const hasUpvoted = issue.upvotes.some(
-              (u) => u.userId === session?.user?.id,
+              (u) => u.userId === session?.user?.id
             );
             const isUpvoting = upvotingIds.has(issue.id);
 
             return (
-              <div key={issue.id} className="rounded-lg bg-white p-4 shadow-sm">
+              <div
+                key={issue.id}
+                className="rounded-lg bg-white p-4 shadow-sm"
+              >
                 {issue.imageUrl && (
                   <img
                     src={issue.imageUrl}
