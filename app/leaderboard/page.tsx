@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 
 type LeaderboardEntry = {
   id: string;
@@ -43,9 +44,10 @@ export default function LeaderboardPage() {
       ) : (
         <div className="overflow-hidden rounded-lg bg-white shadow-sm">
           {leaderboard.map((entry, index) => (
-            <div
+            <Link
               key={entry.id}
-              className="flex items-center justify-between border-b p-4 last:border-none"
+              href={`/users/${entry.id}`}
+              className="flex items-center justify-between border-b p-4 last:border-none hover:bg-gray-50"
             >
               <div className="flex items-center gap-4">
                 <span className="w-8 text-center text-lg font-bold text-gray-400">
@@ -62,7 +64,7 @@ export default function LeaderboardPage() {
               <span className="text-lg font-bold text-blue-600">
                 {entry.score}
               </span>
-            </div>
+            </Link>
           ))}
         </div>
       )}
