@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
@@ -28,6 +28,7 @@ type Issue = {
   status: string;
   createdAt: string;
   createdBy: { name: string };
+  userId: string;
   upvotes: { id: string; userId: string }[];
   comments: Comment[];
 };
@@ -48,17 +49,33 @@ const statusColors: Record<string, string> = {
 
 export default function IssueDetailPage() {
   const params = useParams();
+  const router = useRouter();
   const { data: session } = useSession();
   const [issue, setIssue] = useState<Issue | null>(null);
   const [loading, setLoading] = useState(true);
   const [commentText, setCommentText] = useState("");
   const [posting, setPosting] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editForm, setEditForm] = useState({
+    title: "",
+    description: "",
+    category: "",
+  });
+  const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   const fetchIssue = () => {
     fetch(`/api/issues/${params.id}`)
       .then((res) => res.json())
       .then((data) => {
         setIssue(data.issue);
+        if (data.issue) {
+          setEditForm({
+            title: data.issue.title,
+            description: data.issue.description,
+            category: data.issue.category,
+          });
+        }
         setLoading(false);
       });
   };
@@ -66,6 +83,8 @@ export default function IssueDetailPage() {
   useEffect(() => {
     fetchIssue();
   }, [params.id]);
+
+  const isOwner = issue && session?.user && issue.userId === session.user.id;
 
   const handleCommentSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -92,6 +111,47 @@ export default function IssueDetailPage() {
       }
     } finally {
       setPosting(false);
+    }
+  };
+
+  const handleEditSave = async () => {
+    setSaving(true);
+    try {
+      const res = await fetch(`/api/issues/${params.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(editForm),
+      });
+
+      if (res.ok) {
+        setIsEditing(false);
+        fetchIssue();
+      }
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (
+      !confirm(
+        "Are you sure you want to delete this issue? This cannot be undone.",
+      )
+    ) {
+      return;
+    }
+
+    setDeleting(true);
+    try {
+      const res = await fetch(`/api/issues/${params.id}`, {
+        method: "DELETE",
+      });
+
+      if (res.ok) {
+        router.push("/issues");
+      }
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -132,17 +192,91 @@ export default function IssueDetailPage() {
           </span>
         </div>
 
-        <h1 className="mb-2 text-2xl font-bold text-gray-800">{issue.title}</h1>
-        <p className="mb-4 text-gray-600">{issue.description}</p>
-        <p className="mb-6 text-sm text-gray-400">
-          Reported by {issue.createdBy.name} · 👍 {issue.upvotes.length} upvotes
-        </p>
+        {isEditing ? (
+          <div className="mb-4 space-y-3">
+            <input
+              type="text"
+              value={editForm.title}
+              onChange={(e) =>
+                setEditForm({ ...editForm, title: e.target.value })
+              }
+              className="w-full rounded border border-gray-300 p-2 text-lg font-bold"
+            />
+            <textarea
+              value={editForm.description}
+              onChange={(e) =>
+                setEditForm({ ...editForm, description: e.target.value })
+              }
+              rows={3}
+              className="w-full rounded border border-gray-300 p-2"
+            />
+            <select
+              value={editForm.category}
+              onChange={(e) =>
+                setEditForm({ ...editForm, category: e.target.value })
+              }
+              className="w-full rounded border border-gray-300 p-2"
+            >
+              {Object.entries(categoryLabels).map(([key, label]) => (
+                <option key={key} value={key}>
+                  {label}
+                </option>
+              ))}
+            </select>
+            <div className="flex gap-2">
+              <button
+                onClick={handleEditSave}
+                disabled={saving}
+                className="rounded bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+              >
+                {saving ? "Saving..." : "Save Changes"}
+              </button>
+              <button
+                onClick={() => setIsEditing(false)}
+                className="rounded border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        ) : (
+          <>
+            <h1 className="mb-2 text-2xl font-bold text-gray-800">
+              {issue.title}
+            </h1>
+            <p className="mb-4 text-gray-600">{issue.description}</p>
+          </>
+        )}
+
+        <div className="mb-4 flex items-center justify-between">
+          <p className="text-sm text-gray-400">
+            Reported by {issue.createdBy.name} · 👍 {issue.upvotes.length}{" "}
+            upvotes
+          </p>
+
+          {isOwner && !isEditing && (
+            <div className="flex gap-3 text-sm">
+              <button
+                onClick={() => setIsEditing(true)}
+                className="text-blue-600 hover:underline"
+              >
+                Edit
+              </button>
+              <button
+                onClick={handleDelete}
+                disabled={deleting}
+                className="text-red-600 hover:underline disabled:opacity-50"
+              >
+                {deleting ? "Deleting..." : "Delete"}
+              </button>
+            </div>
+          )}
+        </div>
 
         <div className="mb-6">
           <IssuesMap issues={[issue]} />
         </div>
 
-        {/* Comments Section */}
         <div className="border-t pt-4">
           <h2 className="mb-4 text-lg font-semibold text-gray-800">
             Comments ({issue.comments.length})
