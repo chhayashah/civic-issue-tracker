@@ -6,14 +6,13 @@ import { auth } from "@/auth";
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL_POOLED });
 const prisma = new PrismaClient({ adapter });
 
-// Naya issue create karo
 export async function POST(request: Request) {
   try {
     const session = await auth();
 
     if (!session?.user) {
       return NextResponse.json(
-        { error: "Pehle login karo" },
+        { error: "Please log in first" },
         { status: 401 }
       );
     }
@@ -23,7 +22,7 @@ export async function POST(request: Request) {
 
     if (!title || !description || !category || !latitude || !longitude) {
       return NextResponse.json(
-        { error: "Sab zaroori fields bharo" },
+        { error: "All required fields must be filled" },
         { status: 400 }
       );
     }
@@ -44,13 +43,12 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error(error);
     return NextResponse.json(
-      { error: "Issue create nahi ho paya" },
+      { error: "Failed to create issue" },
       { status: 500 }
     );
   }
 }
 
-// Sab issues fetch karo (list/map view ke liye)
 export async function GET() {
   try {
     const issues = await prisma.issue.findMany({
@@ -67,7 +65,7 @@ export async function GET() {
   } catch (error) {
     console.error(error);
     return NextResponse.json(
-      { error: "Issues fetch nahi hue" },
+      { error: "Failed to fetch issues" },
       { status: 500 }
     );
   }

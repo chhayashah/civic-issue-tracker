@@ -8,20 +8,18 @@ export async function POST(request: Request) {
 
     if (!file) {
       return NextResponse.json(
-        { error: "Koi file nahi mili" },
+        { error: "No file found" },
         { status: 400 }
       );
     }
 
-    // File ko buffer mein convert karo
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
-    // Cloudinary pe upload karo
     const result = await new Promise((resolve, reject) => {
       cloudinary.uploader
         .upload_stream(
-          { folder: "civic-issues" }, // Cloudinary mein isi naam ka folder banega
+          { folder: "civic-issues" },
           (error, result) => {
             if (error) reject(error);
             else resolve(result);
@@ -36,7 +34,7 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error(error);
     return NextResponse.json(
-      { error: "Image upload nahi ho payi" },
+      { error: "Image upload failed" },
       { status: 500 }
     );
   }

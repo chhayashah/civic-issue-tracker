@@ -29,12 +29,10 @@ export default function Navbar() {
 
   useEffect(() => {
     fetchNotifications();
-    // Har 30 second mein naye notifications check karo
     const interval = setInterval(fetchNotifications, 30000);
     return () => clearInterval(interval);
   }, [session?.user]);
 
-  // Dropdown ke bahar click karne pe band ho jaye
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
       if (
@@ -69,6 +67,9 @@ export default function Navbar() {
         <Link href="/issues" className="text-gray-600 hover:text-gray-900">
           Browse Issues
         </Link>
+        <Link href="/leaderboard" className="text-gray-600 hover:text-gray-900">
+          Leaderboard
+        </Link>
 
         {status === "loading" && (
           <span className="text-sm text-gray-400">Loading...</span>
@@ -89,7 +90,6 @@ export default function Navbar() {
               </Link>
             )}
 
-            {/* Bell icon aur dropdown */}
             <div className="relative" ref={dropdownRef}>
               <button
                 onClick={() => setShowDropdown((prev) => !prev)}
@@ -111,7 +111,7 @@ export default function Navbar() {
                   <div className="max-h-80 overflow-y-auto">
                     {notifications.length === 0 ? (
                       <p className="p-4 text-sm text-gray-400">
-                        Koi notification nahi hai.
+                        No notifications yet.
                       </p>
                     ) : (
                       notifications.map((notif) => (
@@ -134,6 +134,10 @@ export default function Navbar() {
                 </div>
               )}
             </div>
+
+            <Link href="/profile" className="text-gray-600 hover:text-gray-900">
+              Profile
+            </Link>
 
             <span className="text-sm text-gray-600">
               Hi, {session.user.name}

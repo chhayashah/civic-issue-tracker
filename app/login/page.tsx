@@ -6,10 +6,7 @@ import { signIn } from "next-auth/react";
 
 export default function LoginPage() {
   const router = useRouter();
-  const [formData, setFormData] = useState({
-    email: "",
-    password: "",
-  });
+  const [formData, setFormData] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -31,7 +28,7 @@ export default function LoginPage() {
     setLoading(false);
 
     if (result?.error) {
-      setError("Email ya password galat hai");
+      setError("Invalid email or password");
       return;
     }
 
@@ -90,7 +87,7 @@ export default function LoginPage() {
         </button>
 
         <p className="mt-4 text-center text-sm text-gray-600">
-          Account nahi hai?{" "}
+          Don't have an account?{" "}
           <a href="/signup" className="text-blue-600 hover:underline">
             Sign up
           </a>

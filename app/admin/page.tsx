@@ -29,7 +29,6 @@ export default function AdminPage() {
   const [updatingId, setUpdatingId] = useState<string | null>(null);
 
   useEffect(() => {
-    // Auth check: sirf ADMIN hi is page ko access kar sake
     if (status === "loading") return;
 
     if (!session?.user || session.user.role !== "ADMIN") {
@@ -72,7 +71,7 @@ export default function AdminPage() {
   }
 
   if (!session?.user || session.user.role !== "ADMIN") {
-    return null; // redirect already ho raha hoga useEffect mein
+    return null;
   }
 
   return (

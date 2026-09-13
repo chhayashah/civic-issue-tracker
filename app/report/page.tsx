@@ -4,12 +4,11 @@ import { useState } from "react";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 
-// Dynamic import — ye SSR issue solve karta hai
 const LocationPicker = dynamic(() => import("@/components/LocationPicker"), {
   ssr: false,
   loading: () => (
     <div className="flex h-[300px] items-center justify-center rounded bg-gray-100">
-      Map load ho raha hai...
+      Loading map...
     </div>
   ),
 });
@@ -41,7 +40,7 @@ export default function ReportIssuePage() {
     setError("");
 
     if (!location) {
-      setError("Map pe click karke location select karo");
+      setError("Please click on the map to select a location");
       return;
     }
 
@@ -50,7 +49,6 @@ export default function ReportIssuePage() {
     try {
       let imageUrl = "";
 
-      // Pehle image upload karo (agar select ki hai)
       if (image) {
         const imgFormData = new FormData();
         imgFormData.append("file", image);
@@ -63,13 +61,12 @@ export default function ReportIssuePage() {
         const uploadData = await uploadRes.json();
 
         if (!uploadRes.ok) {
-          throw new Error(uploadData.error || "Image upload fail hua");
+          throw new Error(uploadData.error || "Image upload failed");
         }
 
         imageUrl = uploadData.url;
       }
 
-      // Ab issue create karo
       const res = await fetch("/api/issues", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -84,12 +81,12 @@ export default function ReportIssuePage() {
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data.error || "Issue create nahi hua");
+        throw new Error(data.error || "Failed to create issue");
       }
 
       router.push("/issues");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Kuch galat ho gaya");
+      setError(err instanceof Error ? err.message : "Something went wrong");
     } finally {
       setLoading(false);
     }
@@ -98,7 +95,7 @@ export default function ReportIssuePage() {
   return (
     <div className="mx-auto max-w-2xl p-6">
       <h1 className="mb-6 text-2xl font-bold text-gray-800">
-        Naya Issue Report Karo
+        Report a New Issue
       </h1>
 
       <form
@@ -119,7 +116,7 @@ export default function ReportIssuePage() {
             value={formData.title}
             onChange={handleChange}
             className="w-full rounded border border-gray-300 p-2"
-            placeholder="e.g. Bada gaddha MG Road pe"
+            placeholder="e.g. Large pothole on MG Road"
             required
           />
         </div>
@@ -134,7 +131,7 @@ export default function ReportIssuePage() {
             onChange={handleChange}
             className="w-full rounded border border-gray-300 p-2"
             rows={4}
-            placeholder="Issue ke baare mein detail mein batao"
+            placeholder="Describe the issue in detail"
             required
           />
         </div>
@@ -171,7 +168,7 @@ export default function ReportIssuePage() {
 
         <div>
           <label className="mb-1 block text-sm font-medium text-gray-700">
-            Location (map pe click karo)
+            Location (click on the map)
           </label>
           <LocationPicker onSelect={(lat, lng) => setLocation({ lat, lng })} />
           {location && (
@@ -186,7 +183,7 @@ export default function ReportIssuePage() {
           disabled={loading}
           className="w-full rounded bg-blue-600 py-2 font-medium text-white hover:bg-blue-700 disabled:opacity-50"
         >
-          {loading ? "Submit ho raha hai..." : "Submit Issue"}
+          {loading ? "Submitting..." : "Submit Issue"}
         </button>
       </form>
     </div>

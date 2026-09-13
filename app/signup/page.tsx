@@ -36,7 +36,6 @@ export default function SignupPage() {
       return;
     }
 
-    // Signup successful, login page pe bhej do
     router.push("/login");
   };
 

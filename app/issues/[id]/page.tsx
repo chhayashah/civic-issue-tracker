@@ -71,7 +71,7 @@ export default function IssueDetailPage() {
     e.preventDefault();
 
     if (!session?.user) {
-      alert("Comment karne ke liye login karo");
+      alert("Please log in to comment");
       return;
     }
 
@@ -100,7 +100,7 @@ export default function IssueDetailPage() {
   }
 
   if (!issue) {
-    return <p className="p-6 text-gray-500">Issue nahi mila.</p>;
+    return <p className="p-6 text-gray-500">Issue not found.</p>;
   }
 
   return (
@@ -109,7 +109,7 @@ export default function IssueDetailPage() {
         href="/issues"
         className="mb-4 inline-block text-sm text-blue-600 hover:underline"
       >
-        ← Sab Issues pe wapas jao
+        ← Back to all issues
       </Link>
 
       <div className="rounded-lg bg-white p-6 shadow-sm">
@@ -154,9 +154,7 @@ export default function IssueDetailPage() {
               value={commentText}
               onChange={(e) => setCommentText(e.target.value)}
               placeholder={
-                session?.user
-                  ? "Comment likho..."
-                  : "Comment karne ke liye login karo"
+                session?.user ? "Write a comment..." : "Log in to comment"
               }
               disabled={!session?.user}
               className="flex-1 rounded border border-gray-300 p-2 disabled:bg-gray-50"
@@ -172,7 +170,7 @@ export default function IssueDetailPage() {
 
           {issue.comments.length === 0 ? (
             <p className="text-sm text-gray-400">
-              Abhi tak koi comment nahi. Pehla comment karo!
+              No comments yet. Be the first to comment!
             </p>
           ) : (
             <div className="space-y-3">

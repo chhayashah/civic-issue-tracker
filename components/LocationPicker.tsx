@@ -5,7 +5,7 @@ import { useState } from "react";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 
-// Leaflet ka default marker icon Next.js mein tootta hai, isse fix karna padta hai
+// Fix for Leaflet's default marker icon breaking in Next.js bundlers
 delete (L.Icon.Default.prototype as any)._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl:
@@ -36,7 +36,7 @@ export default function LocationPicker({
 }: {
   onSelect: (lat: number, lng: number) => void;
 }) {
-  // Default center: Bhopal (tum apne city ke coordinates daal sakte ho)
+  // Default center: Bhopal (change to your city's coordinates if needed)
   const defaultCenter: [number, number] = [23.2599, 77.4126];
 
   return (

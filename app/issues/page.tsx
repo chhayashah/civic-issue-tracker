@@ -9,7 +9,7 @@ const IssuesMap = dynamic(() => import("@/components/IssuesMap"), {
   ssr: false,
   loading: () => (
     <div className="flex h-[400px] items-center justify-center rounded bg-gray-100">
-      Map load ho raha hai...
+      Loading map...
     </div>
   ),
 });
@@ -65,7 +65,7 @@ export default function IssuesPage() {
 
   const handleUpvote = async (issueId: string) => {
     if (!session?.user) {
-      alert("Upvote karne ke liye login karo");
+      alert("Please log in to upvote");
       return;
     }
 
@@ -120,7 +120,7 @@ export default function IssuesPage() {
           onChange={(e) => setCategoryFilter(e.target.value)}
           className="rounded border border-gray-300 p-2"
         >
-          <option value="ALL">Sab Categories</option>
+          <option value="ALL">All Categories</option>
           {Object.entries(categoryLabels).map(([key, label]) => (
             <option key={key} value={key}>
               {label}
@@ -136,7 +136,7 @@ export default function IssuesPage() {
       {loading ? (
         <p className="text-gray-500">Loading issues...</p>
       ) : filteredIssues.length === 0 ? (
-        <p className="text-gray-500">Koi issue nahi mila.</p>
+        <p className="text-gray-500">No issues found.</p>
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {filteredIssues.map((issue) => {

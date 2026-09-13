@@ -15,7 +15,7 @@ export async function PATCH(
 
     if (!session?.user || session.user.role !== "ADMIN") {
       return NextResponse.json(
-        { error: "Sirf admin hi status change kar sakta hai" },
+        { error: "Only admins can change status" },
         { status: 403 }
       );
     }
@@ -36,7 +36,7 @@ export async function PATCH(
       data: { status },
     });
 
-     const statusLabels: Record<string, string> = {
+    const statusLabels: Record<string, string> = {
       PENDING: "Pending",
       IN_REVIEW: "In Review",
       RESOLVED: "Resolved",
@@ -44,7 +44,7 @@ export async function PATCH(
 
     await prisma.notification.create({
       data: {
-        message: `Tumhare issue "${issue.title}" ka status "${statusLabels[status]}" ho gaya`,
+        message: `Your issue "${issue.title}" status changed to "${statusLabels[status]}"`,
         userId: issue.userId,
         link: `/issues/${issueId}`,
       },
@@ -54,7 +54,7 @@ export async function PATCH(
   } catch (error) {
     console.error(error);
     return NextResponse.json(
-      { error: "Status update fail hua" },
+      { error: "Failed to update status" },
       { status: 500 }
     );
   }

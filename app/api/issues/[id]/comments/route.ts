@@ -15,7 +15,7 @@ export async function POST(
 
     if (!session?.user) {
       return NextResponse.json(
-        { error: "Comment karne ke liye login karo" },
+        { error: "Please log in to comment" },
         { status: 401 }
       );
     }
@@ -25,7 +25,7 @@ export async function POST(
 
     if (!content || !content.trim()) {
       return NextResponse.json(
-        { error: "Comment khali nahi ho sakta" },
+        { error: "Comment cannot be empty" },
         { status: 400 }
       );
     }
@@ -40,8 +40,8 @@ export async function POST(
         user: { select: { name: true } },
       },
     });
-      
-      const issue = await prisma.issue.findUnique({
+
+    const issue = await prisma.issue.findUnique({
       where: { id: issueId },
       select: { userId: true, title: true },
     });
@@ -49,7 +49,7 @@ export async function POST(
     if (issue && issue.userId !== session.user.id) {
       await prisma.notification.create({
         data: {
-          message: `${session.user.name} ne tumhare issue "${issue.title}" pe comment kiya`,
+          message: `${session.user.name} commented on your issue "${issue.title}"`,
           userId: issue.userId,
           link: `/issues/${issueId}`,
         },
@@ -60,7 +60,7 @@ export async function POST(
   } catch (error) {
     console.error(error);
     return NextResponse.json(
-      { error: "Comment post nahi hua" },
+      { error: "Failed to post comment" },
       { status: 500 }
     );
   }
