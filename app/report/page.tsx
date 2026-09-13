@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 const LocationPicker = dynamic(() => import("@/components/LocationPicker"), {
   ssr: false,
@@ -12,6 +13,12 @@ const LocationPicker = dynamic(() => import("@/components/LocationPicker"), {
     </div>
   ),
 });
+
+type NearbyIssue = {
+  id: string;
+  title: string;
+  status: string;
+};
 
 export default function ReportIssuePage() {
   const router = useRouter();
@@ -26,6 +33,8 @@ export default function ReportIssuePage() {
   );
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [nearbyIssues, setNearbyIssues] = useState<NearbyIssue[]>([]);
+  const [checkingNearby, setCheckingNearby] = useState(false);
 
   const handleChange = (
     e: React.ChangeEvent<
@@ -34,6 +43,25 @@ export default function ReportIssuePage() {
   ) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
+
+  // Jab bhi location ya category change ho, nearby duplicates check karo
+  useEffect(() => {
+    if (!location) return;
+
+    setCheckingNearby(true);
+    const timer = setTimeout(() => {
+      fetch(
+        `/api/issues/nearby?lat=${location.lat}&lng=${location.lng}&category=${formData.category}`,
+      )
+        .then((res) => res.json())
+        .then((data) => {
+          setNearbyIssues(data.nearby || []);
+          setCheckingNearby(false);
+        });
+    }, 400); // debounce: user ke rukne ka wait karo
+
+    return () => clearTimeout(timer);
+  }, [location, formData.category]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -177,6 +205,39 @@ export default function ReportIssuePage() {
             </p>
           )}
         </div>
+
+        {/* Duplicate warning */}
+        {checkingNearby && (
+          <p className="text-xs text-gray-400">
+            Checking for similar nearby issues...
+          </p>
+        )}
+
+        {!checkingNearby && nearbyIssues.length > 0 && (
+          <div className="rounded-md border border-amber-300 bg-amber-50 p-3">
+            <p className="mb-2 text-sm font-medium text-amber-800">
+              ⚠️ {nearbyIssues.length} similar issue
+              {nearbyIssues.length > 1 ? "s" : ""} already reported nearby:
+            </p>
+            <ul className="space-y-1">
+              {nearbyIssues.map((n) => (
+                <li key={n.id} className="text-sm">
+                  <Link
+                    href={`/issues/${n.id}`}
+                    target="_blank"
+                    className="text-amber-900 underline hover:text-amber-700"
+                  >
+                    {n.title}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+            <p className="mt-2 text-xs text-amber-700">
+              Consider upvoting the existing issue instead of creating a
+              duplicate.
+            </p>
+          </div>
+        )}
 
         <button
           type="submit"

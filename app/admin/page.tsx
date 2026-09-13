@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import AdminAnalytics from "@/components/AdminAnalytics";
 
 type Issue = {
   id: string;
@@ -78,6 +79,10 @@ export default function AdminPage() {
     <div className="mx-auto max-w-6xl p-6">
       <h1 className="mb-6 text-2xl font-bold text-gray-800">Admin Panel</h1>
 
+      <AdminAnalytics />
+
+      <h2 className="mb-4 text-lg font-semibold text-gray-800">All Issues</h2>
+
       <div className="overflow-x-auto rounded-lg bg-white shadow-sm">
         <table className="w-full text-left text-sm">
           <thead className="border-b bg-gray-50 text-gray-600">
@@ -93,7 +98,9 @@ export default function AdminPage() {
           <tbody>
             {issues.map((issue) => (
               <tr key={issue.id} className="border-b last:border-none">
-                <td className="p-3 font-medium text-gray-800">{issue.title}</td>
+                <td className="p-3 font-medium text-gray-800">
+                  {issue.title}
+                </td>
                 <td className="p-3 text-gray-600">{issue.category}</td>
                 <td className="p-3 text-gray-600">{issue.createdBy.name}</td>
                 <td className="p-3 text-gray-600">{issue.upvotes.length}</td>
