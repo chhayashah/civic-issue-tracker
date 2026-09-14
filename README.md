@@ -2,7 +2,7 @@
 
 A full-stack civic-tech platform that lets citizens report local infrastructure problems — potholes, broken street lights, garbage collection issues, and waterlogging — pin them on a map, and track their resolution status. Built with Next.js 16 (App Router), TypeScript, and PostgreSQL.
 
-**Live Demo:** _[add your deployed Vercel link here]_
+**Live Demo:** [civic-issue-tracker-ojjpf3jj5-chhaya-shahs-projects.vercel.app](https://civic-issue-tracker-ojjpf3jj5-chhaya-shahs-projects.vercel.app)
 
 ---
 
