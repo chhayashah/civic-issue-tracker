@@ -18,9 +18,15 @@ export async function GET() {
       select: { category: true, status: true, createdAt: true },
     });
 
+    type IssueForAnalytics = {
+  category: string;
+  status: string;
+  createdAt: Date;
+};
+
     // Category-wise count
     const categoryCounts: Record<string, number> = {};
-    issues.forEach((issue) => {
+    issues.forEach((issue: IssueForAnalytics) => {
       categoryCounts[issue.category] = (categoryCounts[issue.category] || 0) + 1;
     });
     const categoryData = Object.entries(categoryCounts).map(([name, value]) => ({
@@ -30,7 +36,7 @@ export async function GET() {
 
     // Status-wise count
     const statusCounts: Record<string, number> = {};
-    issues.forEach((issue) => {
+    issues.forEach((issue: IssueForAnalytics) => {
       statusCounts[issue.status] = (statusCounts[issue.status] || 0) + 1;
     });
     const statusData = Object.entries(statusCounts).map(([name, value]) => ({
@@ -40,7 +46,7 @@ export async function GET() {
 
     // Monthly trend (last 6 months)
     const monthlyMap: Record<string, number> = {};
-    issues.forEach((issue) => {
+    issues.forEach((issue: IssueForAnalytics) => {
       const date = new Date(issue.createdAt);
       const key = `${date.toLocaleString("default", { month: "short" })} ${date.getFullYear()}`;
       monthlyMap[key] = (monthlyMap[key] || 0) + 1;
