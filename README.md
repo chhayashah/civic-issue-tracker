@@ -126,7 +126,7 @@ For quick testing without creating your own account:
 
 | Role | Email | Password |
 |---|---|---|
-| Admin | `test@example.com` | `test1234` |
+| Admin | `test@example.com` | `test123` |
 ---
 
 ## 📁 Project Structure
