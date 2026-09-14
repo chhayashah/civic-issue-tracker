@@ -85,7 +85,7 @@ Enums: `Role` (CITIZEN, ADMIN) · `Category` (POTHOLE, STREETLIGHT, GARBAGE, WAT
 
 1. **Clone the repo**
 ```bash
-   git clone <your-repo-url>
+   git clone <https://github.com/chhayashah/civic-issue-tracker>
    cd civic-issue-tracker
    npm install
 ```
