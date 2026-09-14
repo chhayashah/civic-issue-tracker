@@ -8,7 +8,7 @@ import Link from "next/link";
 const LocationPicker = dynamic(() => import("@/components/LocationPicker"), {
   ssr: false,
   loading: () => (
-    <div className="flex h-[300px] items-center justify-center rounded bg-gray-100">
+    <div className="flex h-[300px] items-center justify-center rounded bg-gray-100 dark:bg-gray-800">
       Loading map...
     </div>
   ),
@@ -44,7 +44,6 @@ export default function ReportIssuePage() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // Jab bhi location ya category change ho, nearby duplicates check karo
   useEffect(() => {
     if (!location) return;
 
@@ -58,7 +57,7 @@ export default function ReportIssuePage() {
           setNearbyIssues(data.nearby || []);
           setCheckingNearby(false);
         });
-    }, 400); // debounce: user ke rukne ka wait karo
+    }, 400);
 
     return () => clearTimeout(timer);
   }, [location, formData.category]);
@@ -121,132 +120,137 @@ export default function ReportIssuePage() {
   };
 
   return (
-    <div className="mx-auto max-w-2xl p-6">
-      <h1 className="mb-6 text-2xl font-bold text-gray-800">
-        Report a New Issue
-      </h1>
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <div className="mx-auto max-w-2xl p-6">
+        <h1 className="mb-6 text-2xl font-bold text-gray-800 dark:text-white">
+          Report a New Issue
+        </h1>
 
-      <form
-        onSubmit={handleSubmit}
-        className="space-y-5 rounded-lg bg-white p-6 shadow-sm"
-      >
-        {error && (
-          <p className="rounded bg-red-100 p-2 text-sm text-red-600">{error}</p>
-        )}
-
-        <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700">
-            Title
-          </label>
-          <input
-            type="text"
-            name="title"
-            value={formData.title}
-            onChange={handleChange}
-            className="w-full rounded border border-gray-300 p-2"
-            placeholder="e.g. Large pothole on MG Road"
-            required
-          />
-        </div>
-
-        <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700">
-            Description
-          </label>
-          <textarea
-            name="description"
-            value={formData.description}
-            onChange={handleChange}
-            className="w-full rounded border border-gray-300 p-2"
-            rows={4}
-            placeholder="Describe the issue in detail"
-            required
-          />
-        </div>
-
-        <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700">
-            Category
-          </label>
-          <select
-            name="category"
-            value={formData.category}
-            onChange={handleChange}
-            className="w-full rounded border border-gray-300 p-2"
-          >
-            <option value="POTHOLE">Pothole</option>
-            <option value="STREETLIGHT">Street Light</option>
-            <option value="GARBAGE">Garbage</option>
-            <option value="WATERLOGGING">Water Logging</option>
-            <option value="OTHER">Other</option>
-          </select>
-        </div>
-
-        <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700">
-            Photo (optional)
-          </label>
-          <input
-            type="file"
-            accept="image/*"
-            onChange={(e) => setImage(e.target.files?.[0] || null)}
-            className="w-full rounded border border-gray-300 p-2"
-          />
-        </div>
-
-        <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700">
-            Location (click on the map)
-          </label>
-          <LocationPicker onSelect={(lat, lng) => setLocation({ lat, lng })} />
-          {location && (
-            <p className="mt-1 text-xs text-gray-500">
-              Selected: {location.lat.toFixed(4)}, {location.lng.toFixed(4)}
+        <form
+          onSubmit={handleSubmit}
+          className="space-y-5 rounded-lg bg-white p-6 shadow-sm dark:bg-gray-800"
+        >
+          {error && (
+            <p className="rounded bg-red-100 p-2 text-sm text-red-600 dark:bg-red-900/40 dark:text-red-300">
+              {error}
             </p>
           )}
-        </div>
 
-        {/* Duplicate warning */}
-        {checkingNearby && (
-          <p className="text-xs text-gray-400">
-            Checking for similar nearby issues...
-          </p>
-        )}
-
-        {!checkingNearby && nearbyIssues.length > 0 && (
-          <div className="rounded-md border border-amber-300 bg-amber-50 p-3">
-            <p className="mb-2 text-sm font-medium text-amber-800">
-              ⚠️ {nearbyIssues.length} similar issue
-              {nearbyIssues.length > 1 ? "s" : ""} already reported nearby:
-            </p>
-            <ul className="space-y-1">
-              {nearbyIssues.map((n) => (
-                <li key={n.id} className="text-sm">
-                  <Link
-                    href={`/issues/${n.id}`}
-                    target="_blank"
-                    className="text-amber-900 underline hover:text-amber-700"
-                  >
-                    {n.title}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-            <p className="mt-2 text-xs text-amber-700">
-              Consider upvoting the existing issue instead of creating a
-              duplicate.
-            </p>
+          <div>
+            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+              Title
+            </label>
+            <input
+              type="text"
+              name="title"
+              value={formData.title}
+              onChange={handleChange}
+              className="w-full rounded border border-gray-300 bg-white p-2 text-gray-800 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+              placeholder="e.g. Large pothole on MG Road"
+              required
+            />
           </div>
-        )}
 
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full rounded bg-blue-600 py-2 font-medium text-white hover:bg-blue-700 disabled:opacity-50"
-        >
-          {loading ? "Submitting..." : "Submit Issue"}
-        </button>
-      </form>
+          <div>
+            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+              Description
+            </label>
+            <textarea
+              name="description"
+              value={formData.description}
+              onChange={handleChange}
+              className="w-full rounded border border-gray-300 bg-white p-2 text-gray-800 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+              rows={4}
+              placeholder="Describe the issue in detail"
+              required
+            />
+          </div>
+
+          <div>
+            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+              Category
+            </label>
+            <select
+              name="category"
+              value={formData.category}
+              onChange={handleChange}
+              className="w-full rounded border border-gray-300 bg-white p-2 text-gray-800 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+            >
+              <option value="POTHOLE">Pothole</option>
+              <option value="STREETLIGHT">Street Light</option>
+              <option value="GARBAGE">Garbage</option>
+              <option value="WATERLOGGING">Water Logging</option>
+              <option value="OTHER">Other</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+              Photo (optional)
+            </label>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(e) => setImage(e.target.files?.[0] || null)}
+              className="w-full rounded border border-gray-300 bg-white p-2 text-gray-800 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+            />
+          </div>
+
+          <div>
+            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+              Location (click on the map)
+            </label>
+            <LocationPicker
+              onSelect={(lat, lng) => setLocation({ lat, lng })}
+            />
+            {location && (
+              <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                Selected: {location.lat.toFixed(4)}, {location.lng.toFixed(4)}
+              </p>
+            )}
+          </div>
+
+          {checkingNearby && (
+            <p className="text-xs text-gray-400">
+              Checking for similar nearby issues...
+            </p>
+          )}
+
+          {!checkingNearby && nearbyIssues.length > 0 && (
+            <div className="rounded-md border border-amber-300 bg-amber-50 p-3 dark:border-amber-700 dark:bg-amber-900/20">
+              <p className="mb-2 text-sm font-medium text-amber-800 dark:text-amber-300">
+                ⚠️ {nearbyIssues.length} similar issue
+                {nearbyIssues.length > 1 ? "s" : ""} already reported nearby:
+              </p>
+              <ul className="space-y-1">
+                {nearbyIssues.map((n) => (
+                  <li key={n.id} className="text-sm">
+                    <Link
+                      href={`/issues/${n.id}`}
+                      target="_blank"
+                      className="text-amber-900 underline hover:text-amber-700 dark:text-amber-300 dark:hover:text-amber-200"
+                    >
+                      {n.title}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+              <p className="mt-2 text-xs text-amber-700 dark:text-amber-400">
+                Consider upvoting the existing issue instead of creating a
+                duplicate.
+              </p>
+            </div>
+          )}
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full rounded bg-blue-600 py-2 font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+          >
+            {loading ? "Submitting..." : "Submit Issue"}
+          </button>
+        </form>
+      </div>
     </div>
   );
 }

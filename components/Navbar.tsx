@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import { useSession, signOut } from "next-auth/react";
+import ThemeToggle from "@/components/ThemeToggle";
 
 type Notification = {
   id: string;
@@ -55,21 +56,35 @@ export default function Navbar() {
   };
 
   return (
-    <nav className="flex items-center justify-between bg-white px-6 py-4 shadow-sm">
-      <Link href="/" className="text-xl font-bold text-gray-800">
+    <nav className="flex items-center justify-between bg-white px-6 py-4 shadow-sm dark:bg-gray-800">
+      <Link
+        href="/"
+        className="text-xl font-bold text-gray-800 dark:text-white"
+      >
         🏙️ Civic Tracker
       </Link>
 
       <div className="flex items-center gap-4">
-        <Link href="/" className="text-gray-600 hover:text-gray-900">
+        <Link
+          href="/"
+          className="text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
+        >
           Home
         </Link>
-        <Link href="/issues" className="text-gray-600 hover:text-gray-900">
+        <Link
+          href="/issues"
+          className="text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
+        >
           Browse Issues
         </Link>
-        <Link href="/leaderboard" className="text-gray-600 hover:text-gray-900">
+        <Link
+          href="/leaderboard"
+          className="text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
+        >
           Leaderboard
         </Link>
+
+        <ThemeToggle />
 
         {status === "loading" && (
           <span className="text-sm text-gray-400">Loading...</span>
@@ -85,7 +100,10 @@ export default function Navbar() {
             </Link>
 
             {session.user.role === "ADMIN" && (
-              <Link href="/admin" className="text-gray-600 hover:text-gray-900">
+              <Link
+                href="/admin"
+                className="text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
+              >
                 Admin Panel
               </Link>
             )}
@@ -93,7 +111,7 @@ export default function Navbar() {
             <div className="relative" ref={dropdownRef}>
               <button
                 onClick={() => setShowDropdown((prev) => !prev)}
-                className="relative rounded-full p-2 text-gray-600 hover:bg-gray-100"
+                className="relative rounded-full p-2 text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
               >
                 🔔
                 {unreadCount > 0 && (
@@ -104,8 +122,8 @@ export default function Navbar() {
               </button>
 
               {showDropdown && (
-                <div className="absolute right-0 mt-2 w-80 rounded-lg bg-white shadow-lg ring-1 ring-black/5">
-                  <div className="border-b p-3 font-semibold text-gray-800">
+                <div className="absolute right-0 mt-2 w-80 rounded-lg bg-white shadow-lg ring-1 ring-black/5 dark:bg-gray-800 dark:ring-white/10">
+                  <div className="border-b p-3 font-semibold text-gray-800 dark:border-gray-700 dark:text-white">
                     Notifications
                   </div>
                   <div className="max-h-80 overflow-y-auto">
@@ -119,11 +137,13 @@ export default function Navbar() {
                           key={notif.id}
                           href={notif.link || "#"}
                           onClick={() => handleNotificationClick(notif)}
-                          className={`block border-b p-3 text-sm hover:bg-gray-50 ${
-                            !notif.read ? "bg-blue-50" : ""
+                          className={`block border-b p-3 text-sm hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-700 ${
+                            !notif.read ? "bg-blue-50 dark:bg-blue-900/20" : ""
                           }`}
                         >
-                          <p className="text-gray-700">{notif.message}</p>
+                          <p className="text-gray-700 dark:text-gray-200">
+                            {notif.message}
+                          </p>
                           <p className="mt-1 text-xs text-gray-400">
                             {new Date(notif.createdAt).toLocaleString()}
                           </p>
@@ -135,17 +155,20 @@ export default function Navbar() {
               )}
             </div>
 
-            <Link href="/profile" className="text-gray-600 hover:text-gray-900">
+            <Link
+              href="/profile"
+              className="text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
+            >
               Profile
             </Link>
 
-            <span className="text-sm text-gray-600">
+            <span className="text-sm text-gray-600 dark:text-gray-300">
               Hi, {session.user.name}
             </span>
 
             <button
               onClick={() => signOut({ callbackUrl: "/" })}
-              className="text-sm text-red-600 hover:underline"
+              className="text-sm text-red-600 hover:underline dark:text-red-400"
             >
               Logout
             </button>
@@ -154,7 +177,10 @@ export default function Navbar() {
 
         {status === "unauthenticated" && (
           <>
-            <Link href="/login" className="text-gray-600 hover:text-gray-900">
+            <Link
+              href="/login"
+              className="text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
+            >
               Login
             </Link>
             <Link

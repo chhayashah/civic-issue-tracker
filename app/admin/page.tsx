@@ -17,9 +17,11 @@ type Issue = {
 };
 
 const statusColors: Record<string, string> = {
-  PENDING: "bg-yellow-100 text-yellow-800",
-  IN_REVIEW: "bg-blue-100 text-blue-800",
-  RESOLVED: "bg-green-100 text-green-800",
+  PENDING:
+    "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-300",
+  IN_REVIEW: "bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300",
+  RESOLVED:
+    "bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300",
 };
 
 export default function AdminPage() {
@@ -68,7 +70,11 @@ export default function AdminPage() {
   };
 
   if (status === "loading" || loading) {
-    return <p className="p-6 text-gray-500">Loading...</p>;
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+        <p className="p-6 text-gray-500 dark:text-gray-400">Loading...</p>
+      </div>
+    );
   }
 
   if (!session?.user || session.user.role !== "ADMIN") {
@@ -76,59 +82,74 @@ export default function AdminPage() {
   }
 
   return (
-    <div className="mx-auto max-w-6xl p-6">
-      <h1 className="mb-6 text-2xl font-bold text-gray-800">Admin Panel</h1>
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <div className="mx-auto max-w-6xl p-6">
+        <h1 className="mb-6 text-2xl font-bold text-gray-800 dark:text-white">
+          Admin Panel
+        </h1>
 
-      <AdminAnalytics />
+        <AdminAnalytics />
 
-      <h2 className="mb-4 text-lg font-semibold text-gray-800">All Issues</h2>
+        <h2 className="mb-4 text-lg font-semibold text-gray-800 dark:text-white">
+          All Issues
+        </h2>
 
-      <div className="overflow-x-auto rounded-lg bg-white shadow-sm">
-        <table className="w-full text-left text-sm">
-          <thead className="border-b bg-gray-50 text-gray-600">
-            <tr>
-              <th className="p-3">Title</th>
-              <th className="p-3">Category</th>
-              <th className="p-3">Reported By</th>
-              <th className="p-3">Upvotes</th>
-              <th className="p-3">Status</th>
-              <th className="p-3">Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {issues.map((issue) => (
-              <tr key={issue.id} className="border-b last:border-none">
-                <td className="p-3 font-medium text-gray-800">
-                  {issue.title}
-                </td>
-                <td className="p-3 text-gray-600">{issue.category}</td>
-                <td className="p-3 text-gray-600">{issue.createdBy.name}</td>
-                <td className="p-3 text-gray-600">{issue.upvotes.length}</td>
-                <td className="p-3">
-                  <span
-                    className={`rounded px-2 py-1 text-xs font-medium ${statusColors[issue.status]}`}
-                  >
-                    {issue.status.replace("_", " ")}
-                  </span>
-                </td>
-                <td className="p-3">
-                  <select
-                    value={issue.status}
-                    onChange={(e) =>
-                      handleStatusChange(issue.id, e.target.value)
-                    }
-                    disabled={updatingId === issue.id}
-                    className="rounded border border-gray-300 p-1 text-sm disabled:opacity-50"
-                  >
-                    <option value="PENDING">Pending</option>
-                    <option value="IN_REVIEW">In Review</option>
-                    <option value="RESOLVED">Resolved</option>
-                  </select>
-                </td>
+        <div className="overflow-x-auto rounded-lg bg-white shadow-sm dark:bg-gray-800">
+          <table className="w-full text-left text-sm">
+            <thead className="border-b bg-gray-50 text-gray-600 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300">
+              <tr>
+                <th className="p-3">Title</th>
+                <th className="p-3">Category</th>
+                <th className="p-3">Reported By</th>
+                <th className="p-3">Upvotes</th>
+                <th className="p-3">Status</th>
+                <th className="p-3">Action</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {issues.map((issue) => (
+                <tr
+                  key={issue.id}
+                  className="border-b last:border-none dark:border-gray-700"
+                >
+                  <td className="p-3 font-medium text-gray-800 dark:text-white">
+                    {issue.title}
+                  </td>
+                  <td className="p-3 text-gray-600 dark:text-gray-300">
+                    {issue.category}
+                  </td>
+                  <td className="p-3 text-gray-600 dark:text-gray-300">
+                    {issue.createdBy.name}
+                  </td>
+                  <td className="p-3 text-gray-600 dark:text-gray-300">
+                    {issue.upvotes.length}
+                  </td>
+                  <td className="p-3">
+                    <span
+                      className={`rounded px-2 py-1 text-xs font-medium ${statusColors[issue.status]}`}
+                    >
+                      {issue.status.replace("_", " ")}
+                    </span>
+                  </td>
+                  <td className="p-3">
+                    <select
+                      value={issue.status}
+                      onChange={(e) =>
+                        handleStatusChange(issue.id, e.target.value)
+                      }
+                      disabled={updatingId === issue.id}
+                      className="rounded border border-gray-300 bg-white p-1 text-sm text-gray-800 disabled:opacity-50 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                    >
+                      <option value="PENDING">Pending</option>
+                      <option value="IN_REVIEW">In Review</option>
+                      <option value="RESOLVED">Resolved</option>
+                    </select>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );

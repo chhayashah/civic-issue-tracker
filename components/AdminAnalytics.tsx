@@ -59,9 +59,10 @@ export default function AdminAnalytics() {
 
   return (
     <div className="mb-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
-      {/* Category breakdown - Pie chart */}
-      <div className="rounded-lg bg-white p-5 shadow-sm">
-        <h3 className="mb-4 font-semibold text-gray-800">Issues by Category</h3>
+      <div className="rounded-lg bg-white p-5 shadow-sm dark:bg-gray-800">
+        <h3 className="mb-4 font-semibold text-gray-800 dark:text-white">
+          Issues by Category
+        </h3>
         <ResponsiveContainer width="100%" height={250}>
           <PieChart>
             <Pie
@@ -85,9 +86,10 @@ export default function AdminAnalytics() {
         </ResponsiveContainer>
       </div>
 
-      {/* Status breakdown - Pie chart */}
-      <div className="rounded-lg bg-white p-5 shadow-sm">
-        <h3 className="mb-4 font-semibold text-gray-800">Issues by Status</h3>
+      <div className="rounded-lg bg-white p-5 shadow-sm dark:bg-gray-800">
+        <h3 className="mb-4 font-semibold text-gray-800 dark:text-white">
+          Issues by Status
+        </h3>
         <ResponsiveContainer width="100%" height={250}>
           <PieChart>
             <Pie
@@ -112,9 +114,10 @@ export default function AdminAnalytics() {
         </ResponsiveContainer>
       </div>
 
-      {/* Monthly trend - Bar chart */}
-      <div className="rounded-lg bg-white p-5 shadow-sm lg:col-span-2">
-        <h3 className="mb-4 font-semibold text-gray-800">Issues Reported Over Time</h3>
+      <div className="rounded-lg bg-white p-5 shadow-sm dark:bg-gray-800 lg:col-span-2">
+        <h3 className="mb-4 font-semibold text-gray-800 dark:text-white">
+          Issues Reported Over Time
+        </h3>
         <ResponsiveContainer width="100%" height={250}>
           <BarChart data={data.monthlyData}>
             <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />

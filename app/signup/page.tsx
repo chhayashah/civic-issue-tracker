@@ -40,21 +40,23 @@ export default function SignupPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-100">
+    <div className="flex min-h-screen items-center justify-center bg-gray-100 dark:bg-gray-900">
       <form
         onSubmit={handleSubmit}
-        className="w-full max-w-md rounded-lg bg-white p-8 shadow-md"
+        className="w-full max-w-md rounded-lg bg-white p-8 shadow-md dark:bg-gray-800"
       >
-        <h1 className="mb-6 text-2xl font-bold text-gray-800">Sign Up</h1>
+        <h1 className="mb-6 text-2xl font-bold text-gray-800 dark:text-white">
+          Sign Up
+        </h1>
 
         {error && (
-          <p className="mb-4 rounded bg-red-100 p-2 text-sm text-red-600">
+          <p className="mb-4 rounded bg-red-100 p-2 text-sm text-red-600 dark:bg-red-900/40 dark:text-red-300">
             {error}
           </p>
         )}
 
         <div className="mb-4">
-          <label className="mb-1 block text-sm font-medium text-gray-700">
+          <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
             Name
           </label>
           <input
@@ -62,13 +64,13 @@ export default function SignupPage() {
             name="name"
             value={formData.name}
             onChange={handleChange}
-            className="w-full rounded border border-gray-300 p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full rounded border border-gray-300 bg-white p-2 text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
             required
           />
         </div>
 
         <div className="mb-4">
-          <label className="mb-1 block text-sm font-medium text-gray-700">
+          <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
             Email
           </label>
           <input
@@ -76,13 +78,13 @@ export default function SignupPage() {
             name="email"
             value={formData.email}
             onChange={handleChange}
-            className="w-full rounded border border-gray-300 p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full rounded border border-gray-300 bg-white p-2 text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
             required
           />
         </div>
 
         <div className="mb-6">
-          <label className="mb-1 block text-sm font-medium text-gray-700">
+          <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
             Password
           </label>
           <input
@@ -90,7 +92,7 @@ export default function SignupPage() {
             name="password"
             value={formData.password}
             onChange={handleChange}
-            className="w-full rounded border border-gray-300 p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full rounded border border-gray-300 bg-white p-2 text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
             required
           />
         </div>
